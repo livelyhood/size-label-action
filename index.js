@@ -58,6 +58,7 @@ async function main() {
 
   const octokit = new Octokit({
     auth: `token ${GITHUB_TOKEN}`,
+    baseUrl: process.env.GITHUB_API_URL || "https://api.github.com",
     userAgent: "pascalgn/size-label-action"
   });
 
@@ -75,6 +76,12 @@ async function main() {
   const sizes = getSizesInput();
   const sizeLabel = getSizeLabel(changedLines, sizes);
   console.log("Matching label:", sizeLabel);
+
+  const githubOutput = process.env.GITHUB_OUTPUT;
+  if (githubOutput) {
+    fs.writeFileSync(githubOutput, `sizeLabel="${sizeLabel}"`);
+    debug(`Written label '${sizeLabel}' to ${githubOutput}`);
+  }
 
   const { add, remove } = getLabelChanges(
     sizeLabel,

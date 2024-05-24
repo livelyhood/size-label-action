@@ -19,7 +19,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: size-label
-        uses: "livelyhood/size-label-action@v0.5.0"
+        uses: "pascalgn/size-label-action@v0.5.2"
         env:
           GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
 ```
@@ -81,7 +81,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: size-label
-        uses: "pascalgn/size-label-action@v0.4.2"
+        uses: "pascalgn/size-label-action@v0.5.2"
         env:
           GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
         with:
@@ -94,6 +94,35 @@ jobs:
               "800": "XL",
               "2000": "XXL"
             }
+```
+
+## Using with other actions
+
+If creating workflow with multiple jobs, they can react on the label set by this action:
+
+```yaml
+name: size-label
+on: pull_request_target
+jobs:
+  label:
+    permissions:
+      contents: read
+      pull-requests: write
+    runs-on: ubuntu-latest
+    outputs:
+      label: ${{ steps.label.outputs.sizeLabel }}
+    steps:
+      - name: size-label
+        id: label
+        uses: "pascalgn/size-label-action@v0.5.2"
+        env:
+          GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+  comment:
+    runs-on: ubuntu-latest
+    needs: label
+    if: ${{ contains(needs.label.outputs.label, 'XL') }}
+    steps:
+      - run: echo "Too big PR"
 ```
 
 ## License
